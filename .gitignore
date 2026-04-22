@@ -1,0 +1,5 @@
+/.env
+/messageLog.json
+/node_modules
+/package-lock.json
+/parkData.json

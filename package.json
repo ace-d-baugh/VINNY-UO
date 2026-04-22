@@ -1,0 +1,27 @@
+{
+  "name": "vinny-uo",
+  "version": "1.0.0",
+  "description": "VINNY UO - A Discord bot for Universal Orlando Resort attraction statuses and wait times",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "setup-pins": "node setup-pins.js",
+    "update-env": "node update-env.js"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "universal",
+    "theme-parks"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}
