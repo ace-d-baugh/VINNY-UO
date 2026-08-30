@@ -25,7 +25,8 @@ const CONFIG = {
       id: 'eb3f4560-2383-4a36-9152-6b3e5ed6bc57',
       emoji: '<:uo:1496201269856043049>',
       channelId: process.env.UO_CHANNEL_ID,
-      pinnedMsgId: process.env.UO_PINNED_MSG_ID
+      pinnedMsgId: process.env.UO_PINNED_MSG_ID,
+      scheduleTypes: ['OPERATING', 'TICKETED_EVENT']
     },
     IA: {
       name: 'Islands of Adventure',
@@ -33,7 +34,8 @@ const CONFIG = {
       id: '267615cc-8943-4c2a-ae2c-5da728ca591f',
       emoji: '<:ia:1496201311421468724>',
       channelId: process.env.IA_CHANNEL_ID,
-      pinnedMsgId: process.env.IA_PINNED_MSG_ID
+      pinnedMsgId: process.env.IA_PINNED_MSG_ID,
+      scheduleTypes: ['OPERATING', 'TICKETED_EVENT']
     },
     EU: {
       name: 'Epic Universe',
@@ -41,7 +43,21 @@ const CONFIG = {
       id: '12dbb85b-265f-44e6-bccf-f1faa17211fc',
       emoji: '<:eu:1496201338860736715>',
       channelId: process.env.EU_CHANNEL_ID,
-      pinnedMsgId: process.env.EU_PINNED_MSG_ID
+      pinnedMsgId: process.env.EU_PINNED_MSG_ID,
+      scheduleTypes: ['OPERATING', 'TICKETED_EVENT']
+    },
+    // Halloween Horror Nights runs inside Universal Studios Florida on separate
+    // ticketed-event hours, so it reuses USF's entity id for the live/schedule
+    // API calls but is tracked as its own group with its own channel + pinned
+    // overview, section on the All Parks board, and per-house channels below.
+    HHN: {
+      name: 'Halloween Horror Nights',
+      shortName: 'HHN',
+      id: 'eb3f4560-2383-4a36-9152-6b3e5ed6bc57',
+      emoji: process.env.HHN_EMOJI || '🎃',
+      channelId: process.env.HHN_CHANNEL_ID,
+      pinnedMsgId: process.env.HHN_PINNED_MSG_ID,
+      scheduleTypes: ['TICKETED_EVENT']
     }
   },
   ALL_PARKS: {
@@ -87,6 +103,25 @@ const ATTRACTIONS = {
     { name: "Storm Force Accelatron®", shortName: "Storm Force", id: "b694d5a5-155e-4796-af7e-5dbdcf3deba4", channelId: process.env.STORM_FORCE_CHANNEL_ID },
     { name: "Jurassic World VelociCoaster", shortName: "VelociCoaster", id: "61079a31-4165-4fb0-b36f-c01c5971f80a", channelId: process.env.VELOCICOASTER_CHANNEL_ID }
   ],
+  // Halloween Horror Nights 35 (2026) haunted houses.
+  // IDs below are placeholders — the themeparks.wiki API is not reachable from this
+  // environment, so they could not be looked up here. Run `node find-hhn-houses.js`
+  // (it queries the live destination endpoint and matches these names) and paste the
+  // real entity ids in. Any house still holding a REPLACE_ME id is filtered out at
+  // startup, so the bot runs fine before you fill these in — the HHN group and its
+  // channels just stay empty until you do.
+  HHN: [
+    { name: "Jack and Oddfellow: Chaos and Control", shortName: "Jack & Oddfellow", id: "REPLACE_ME_JACK_ODDFELLOW", channelId: process.env.JACK_ODDFELLOW_CHANNEL_ID },
+    { name: "Stranger Things 5", shortName: "Stranger Things", id: "REPLACE_ME_STRANGER_THINGS", channelId: process.env.STRANGER_THINGS_CHANNEL_ID },
+    { name: "Hellraiser", shortName: "Hellraiser", id: "REPLACE_ME_HELLRAISER", channelId: process.env.HELLRAISER_CHANNEL_ID },
+    { name: "Sinners", shortName: "Sinners", id: "REPLACE_ME_SINNERS", channelId: process.env.SINNERS_CHANNEL_ID },
+    { name: "Madlands: Caged Cannibals", shortName: "Madlands", id: "REPLACE_ME_MADLANDS", channelId: process.env.MADLANDS_CHANNEL_ID },
+    { name: "H.R. Bloodengutz Presents: A Halloween Fright-Tacular", shortName: "Bloodengutz", id: "REPLACE_ME_BLOODENGUTZ", channelId: process.env.BLOODENGUTZ_CHANNEL_ID },
+    { name: "Cybergoria", shortName: "Cybergoria", id: "REPLACE_ME_CYBERGORIA", channelId: process.env.CYBERGORIA_CHANNEL_ID },
+    { name: "INVASION: Alien Abduction", shortName: "Invasion", id: "REPLACE_ME_INVASION", channelId: process.env.INVASION_CHANNEL_ID },
+    { name: "Evil Dead Burn", shortName: "Evil Dead Burn", id: "REPLACE_ME_EVIL_DEAD_BURN", channelId: process.env.EVIL_DEAD_BURN_CHANNEL_ID },
+    { name: "Ozzy Osbourne: Prince of Darkness", shortName: "Ozzy Osbourne", id: "REPLACE_ME_OZZY_OSBOURNE", channelId: process.env.OZZY_OSBOURNE_CHANNEL_ID }
+  ],
   EU: [
     { name: "Constellation Carousel", shortName: "Constellation", id: "07143999-bacd-475f-a00b-8cc476204aff", channelId: process.env.CONSTELLATION_CHANNEL_ID },
     { name: "Mine-Cart Madness™", shortName: "Donkey Kong", id: "dd8c015d-511f-47d4-b98b-18ce15735588", channelId: process.env.MINE_CART_CHANNEL_ID },
@@ -101,6 +136,10 @@ const ATTRACTIONS = {
     { name: "Yoshi's Adventure™", shortName: "Yoshi", id: "00feb57b-4fcc-48bc-9490-c9af71f30c1c", channelId: process.env.YOSHI_CHANNEL_ID }
   ]
 };
+
+// Drop any HHN house whose id hasn't been filled in yet (see find-hhn-houses.js)
+// so the bot runs cleanly before the entity ids are known.
+ATTRACTIONS.HHN = ATTRACTIONS.HHN.filter(attr => attr.id && !attr.id.startsWith('REPLACE_ME'));
 
 // Track last sent status for each attraction to prevent duplicate messages
 const lastAttractionStatus = {};
@@ -125,7 +164,7 @@ async function initializeData() {
   };
 
   for (const [key, park] of Object.entries(CONFIG.PARKS)) {
-    initialData.parks[park.id] = {
+    initialData.parks[key] = {
       name: park.name,
       shortName: park.shortName,
       id: park.id,
@@ -159,6 +198,20 @@ async function loadData() {
   try {
     const fileContent = await fs.readFile(CONFIG.DATA_FILE, 'utf8');
     const data = JSON.parse(fileContent);
+
+    for (const [parkKey, park] of Object.entries(CONFIG.PARKS)) {
+      if (!data.parks[parkKey]) {
+        data.parks[parkKey] = {
+          name: park.name,
+          shortName: park.shortName,
+          id: park.id,
+          status: 'closed',
+          code: 107,
+          lastChanged: new Date('2000-01-01T00:00:00Z').toISOString(),
+          hours: { segments: [] }
+        };
+      }
+    }
 
     for (const [parkKey, attractions] of Object.entries(ATTRACTIONS)) {
       for (const attr of attractions) {
@@ -281,7 +334,7 @@ async function processMessageLogOnStartup(storedData) {
     if (!park) { parkKeysToRemove.push(key); continue; }
 
     const sentAt = new Date(entry.sentAt);
-    const parkData = storedData.parks[park.id];
+    const parkData = storedData.parks[parkKey];
     const parkIsClosed = !isWithinParkHours(parkData);
 
     if (entry.code === 101) {
@@ -328,7 +381,7 @@ async function processMessageLogOnStartup(storedData) {
     if (!attrConfig) { attrKeysToRemove.push(key); continue; }
 
     const park = CONFIG.PARKS[parkKey];
-    const parkData = storedData.parks[park.id];
+    const parkData = storedData.parks[parkKey];
     const parkIsClosed = !isWithinParkHours(parkData);
 
     if (parkIsClosed) {
@@ -348,7 +401,7 @@ async function processMessageLogOnStartup(storedData) {
     const park = CONFIG.PARKS[entry.parkKey];
     if (!park) { waitKeysToRemove.push(key); continue; }
 
-    const parkData = storedData.parks[park.id];
+    const parkData = storedData.parks[entry.parkKey];
     const parkIsClosed = !isWithinParkHours(parkData);
 
     if (parkIsClosed) {
@@ -375,7 +428,7 @@ async function fetchAllLiveData() {
   }
 }
 
-async function fetchParkSchedule(parkId) {
+async function fetchParkSchedule(parkId, types = ['OPERATING', 'TICKETED_EVENT']) {
   try {
     const url = CONFIG.SCHEDULE_API_URL.replace('{id}', parkId);
     const response = await fetch(url);
@@ -384,7 +437,7 @@ async function fetchParkSchedule(parkId) {
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 
     const todayEntries = (data.schedule || []).filter(s => {
-      return s.date === today && (s.type === 'OPERATING' || s.type === 'TICKETED_EVENT');
+      return s.date === today && types.includes(s.type);
     });
 
     if (todayEntries.length === 0) return [];
@@ -434,10 +487,10 @@ async function fetchAllParkSchedules() {
     console.log('Fetching park schedules...');
     const storedData = await loadData();
     for (const [parkKey, park] of Object.entries(CONFIG.PARKS)) {
-      const segments = await fetchParkSchedule(park.id);
-      storedData.parks[park.id].hours = { segments };
-      storedData.parks[park.id].status = 'closed';
-      storedData.parks[park.id].code = 107;
+      const segments = await fetchParkSchedule(park.id, park.scheduleTypes);
+      storedData.parks[parkKey].hours = { segments };
+      storedData.parks[parkKey].status = 'closed';
+      storedData.parks[parkKey].code = 107;
       console.log(`Fetched schedule for ${parkKey}: ${segments.length} segment(s)`);
     }
     await saveData(storedData);
@@ -664,6 +717,8 @@ function getAttractionPrefix(attr) {
 }
 
 function formatAttractionColumns(attractions) {
+  if (attractions.length === 0) return 'None configured yet\n';
+
   const halfLength = Math.ceil(attractions.length / 2);
   const column1 = attractions.slice(0, halfLength);
   const column2 = attractions.slice(halfLength);
@@ -734,7 +789,7 @@ async function updateAllParksPinnedMessage(storedData) {
     let content = '';
 
     for (const [parkKey, parkConfig] of Object.entries(CONFIG.PARKS)) {
-      const park = storedData.parks[parkConfig.id];
+      const park = storedData.parks[parkKey];
       const parkAttractions = ATTRACTIONS[parkKey].map(attr => storedData.attractions[attr.id]);
 
       const hours = formatHoursFromSegments(park.hours?.segments);
@@ -766,7 +821,7 @@ async function processData() {
     const currentTime = formatTime(new Date());
 
     for (const [parkKey, park] of Object.entries(CONFIG.PARKS)) {
-      const storedPark = storedData.parks[park.id];
+      const storedPark = storedData.parks[parkKey];
       const parkAttractions = ATTRACTIONS[parkKey].map(attr => {
         const liveAttr = liveData.liveData.find(item => item.id === attr.id);
         return {

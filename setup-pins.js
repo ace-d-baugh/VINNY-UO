@@ -38,6 +38,12 @@ const PARKS = {
     shortName: 'EU',
     channelId: process.env.EU_CHANNEL_ID,
     envKey: 'EU_PINNED_MSG_ID'
+  },
+  HHN: {
+    name: 'Halloween Horror Nights',
+    shortName: 'HHN',
+    channelId: process.env.HHN_CHANNEL_ID,
+    envKey: 'HHN_PINNED_MSG_ID'
   }
 };
 
@@ -121,7 +127,8 @@ client.once('ready', async () => {
 
   console.log('\n=== SETUP COMPLETE ===\n');
 
-  const allSucceeded = Object.keys(newMessageIds).length === 4; // 3 parks + all parks
+  const expectedCount = Object.values(PARKS).filter(p => p.channelId).length + (allParksChannelId ? 1 : 0);
+  const allSucceeded = Object.keys(newMessageIds).length === expectedCount;
   if (!allSucceeded) {
     console.log('⚠️  Some messages could not be created. Check the errors above.');
     console.log('   Fix the issues, delete any messages created this run, and try again.\n');
@@ -130,7 +137,7 @@ client.once('ready', async () => {
   console.log('New pinned message IDs:');
   const envKeys = [
     'UO_PINNED_MSG_ID', 'IA_PINNED_MSG_ID',
-    'EU_PINNED_MSG_ID', 'ALL_PARKS_PINNED_MSG_ID'
+    'EU_PINNED_MSG_ID', 'HHN_PINNED_MSG_ID', 'ALL_PARKS_PINNED_MSG_ID'
   ];
   envKeys.forEach(key => {
     console.log(`  ${key}=${newMessageIds[key] || 'FAILED'}`);

@@ -9,21 +9,22 @@ Built by [Ace Baugh](https://github.com/AceBaugh)
 ## Features
 
 - Monitors all three Universal Orlando theme parks — Universal Studios Florida, Islands of Adventure, and Epic Universe
+- Monitors Halloween Horror Nights haunted houses (Sinners, Hellraiser, and the rest of the current house lineup) as their own group, on the event's own ticketed-event hours — see [Halloween Horror Nights](#halloween-horror-nights) below
 - Polls live attraction data every 10 seconds via the [ThemeParks.wiki API](https://themeparks.wiki/)
 - Sends notifications for:
-  - Park opening (`🚀🚀🚀` Code 108)
-  - Park closing (`🚫🚫🚫` Code 107)
-  - Attraction breakdown during operating hours (`❌❌❌` Code 101)
-  - Attraction reopening during operating hours (`🟢🟢🟢` Code 102)
-  - Attraction early close during operating hours (`⬛️⬛️⬛️` Code 107)
-  - Significant wait time changes (±20 minutes or more)
+  - Park/event opening (`🚀🚀🚀` Code 108)
+  - Park/event closing (`🚫🚫🚫` Code 107)
+  - Attraction or house breakdown during operating hours (`❌❌❌` Code 101)
+  - Attraction or house reopening during operating hours (`🟢🟢🟢` Code 102)
+  - Attraction or house early close during operating hours (`⬛️⬛️⬛️` Code 107)
+  - Significant wait time changes (±20 minutes or more) — same logic for rides and houses
 - Displays live wait times as 3-digit emoji in pinned messages (e.g. `0️⃣4️⃣5️⃣` = 45 min)
-- Maintains pinned messages in each park channel and an all-parks overview channel
-- Per-attraction dedicated channels with full status history for the day
-- Wait time change alerts posted to a general `#wait-change` channel and each attraction's own channel
+- Maintains pinned messages in each park channel, the HHN houses channel, and an all-parks overview channel (with its own HHN section)
+- Per-attraction and per-house dedicated channels with full status history for the day
+- Wait time change alerts posted to a general `#wait-change` channel and each attraction's or house's own channel
 - Persistent message log (`messageLog.json`) for intelligent cleanup on restart
 - Silent restart — on reboot, syncs current state and updates pinned messages without spamming notifications (101 re-alerts for any currently down attractions)
-- All messages self-delete or are cleaned up at end of each park's operating day
+- All messages self-delete or are cleaned up at end of each park's or event's operating day
 
 ---
 
@@ -86,6 +87,37 @@ Or use the automated setup scripts:
 node setup-pins.js
 node update-env.js
 ```
+
+### Halloween Horror Nights
+
+Halloween Horror Nights (HHN) runs inside Universal Studios Florida on separate,
+ticketed-event hours (the `TICKETED_EVENT` schedule type, layered on top of USF's
+normal `OPERATING` hours). VINNY tracks it as its own group, structured the same
+way as UO/IA/EU:
+
+- One **HHN group channel** with a pinned overview of every house's status/wait time (`HHN_CHANNEL_ID` + `HHN_PINNED_MSG_ID`), open only during the event's own hours
+- One **dedicated channel per house** (same pattern as per-attraction channels)
+- Its own section in the All Parks overview pinned message
+- The same wait-time-change alerts (±20 min) in `#wait-change` and each house's channel
+
+**Setup:**
+
+1. The house lineup (`ATTRACTIONS.HHN` in `index.js`) is pre-filled with this year's
+   houses (Sinners, Hellraiser, etc.), but their themeparks.wiki entity ids are
+   placeholders — `api.themeparks.wiki` isn't reachable from every environment, so
+   they couldn't be looked up automatically. Run:
+   ```bash
+   node find-hhn-houses.js
+   ```
+   from a machine with real internet access. It queries the live data feed and
+   matches entity names against the house list, printing the real ids to paste
+   into the `id: "REPLACE_ME_..."` fields in `index.js`. Any house still holding
+   a placeholder id is skipped at startup, so the bot runs fine before you fill
+   these in — the HHN group just stays empty until you do.
+2. Create the HHN group channel and each house's channel in Discord, add their IDs
+   to `.env` (`HHN_CHANNEL_ID` and one `*_CHANNEL_ID` per house, matching the names
+   already wired up in `index.js`), then run `node setup-pins.js` and
+   `node update-env.js` as usual to create and record the pinned overview message.
 
 ### Custom Park Emojis
 
