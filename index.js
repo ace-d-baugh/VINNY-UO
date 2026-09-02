@@ -90,7 +90,7 @@ const ATTRACTIONS = {
   EU: [
     { name: "Constellation Carousel", shortName: "Constellation", id: "07143999-bacd-475f-a00b-8cc476204aff", channelId: process.env.CONSTELLATION_CHANNEL_ID },
     { name: "Mine-Cart Madness™", shortName: "Donkey Kong", id: "dd8c015d-511f-47d4-b98b-18ce15735588", channelId: process.env.MINE_CART_CHANNEL_ID },
-    { name: "Dragon Racer's Rally", shortName: "Dragon Racers", id: "76caa8d0-f54b-4601-9d57-a7f1ddc02af4", channelId: process.env.DRAGION_RACERS_CHANNEL_ID },
+    { name: "Dragon Racer's Rally", shortName: "Dragon Racers", id: "76caa8d0-f54b-4601-9d57-a7f1ddc02af4", channelId: process.env.DRAGON_RACERS_CHANNEL_ID },
     { name: "Fyre Drill", shortName: "Fyre Drill", id: "281bc9e6-b208-4a70-85d2-0fb749c7658b", channelId: process.env.FYRE_DRILL_CHANNEL_ID },
     { name: "Mario Kart™: Bowser's Challenge", shortName: "Mario Kart", id: "43df71bf-aa7c-46c0-925c-46f69d8bf23f", channelId: process.env.MARIO_KART_CHANNEL_ID },
     { name: "Harry Potter and the Battle at the Ministry™", shortName: "Ministry", id: "dbc4f0d8-fdef-4dfc-a1c2-33917f742f40", channelId: process.env.MINISTRY_CHANNEL_ID },
@@ -99,6 +99,18 @@ const ATTRACTIONS = {
     { name: "Curse of the Werewolf", shortName: "Werewolf", id: "eaca831d-bcbb-4a1e-9bf0-6ea97ccc88e0", channelId: process.env.WEREWOLF_CHANNEL_ID },
     { name: "Hiccup Wing Glider", shortName: "Wing Glider", id: "c6b1b8cf-55ef-416c-b00d-e469993617b0", channelId: process.env.WING_GLIDERS_CHANNEL_ID },
     { name: "Yoshi's Adventure™", shortName: "Yoshi", id: "00feb57b-4fcc-48bc-9490-c9af71f30c1c", channelId: process.env.YOSHI_CHANNEL_ID }
+  ],
+  HHN: [
+    { name: "INVASION: Alien Abduction", shortName: "Alien", id: "53ac1ddd-51b1-4b5b-a72b-3a7b3e25397a", channelId: process.env.ALIEN_CHANNEL_ID },
+    { name: "H.R. Bloodengutz Presents: A Halloween Fright-Tacular", shortName: "Bloodengutz", id: "99accf82-ca8d-425d-abc8-33e69aee75e9", channelId: process.env.BLOODENGUTZ_CHANNEL_ID },
+    { name: "Cybergoria", shortName: "Cybergoria", id: "41c4491c-f3d9-41e5-963c-21a10a255b39", channelId: process.env.CYBERGORIA_CHANNEL_ID },
+    { name: "Evil Dead Burn", shortName: "Evil Dead", id: "be4bc36e-e2d8-474b-9ea7-74c0e3e6c82d", channelId: process.env.EVIL_DEAD_CHANNEL_ID },
+    { name: "Hellraiser", shortName: "Hellraiser", id: "98ac6a78-0320-4949-8824-934d0e73e4e2", channelId: process.env.HELLRAISER_CHANNEL_ID },
+    { name: "Jack & Oddfellow: Chaos & Control", shortName: "Jack N' Odd", id: "709e0baf-dd74-4b4e-9d19-7092336c0846", channelId: process.env.JACK_N_ODD_CHANNEL_ID },
+    { name: "MADLANDS: Caged Cannibals", shortName: "Madlands", id: "6b57dae1-a6e9-42ba-b59d-8ef4ee8ae11e", channelId: process.env.MADLANDS_CHANNEL_ID },
+    { name: "Ozzy Osbourne: Prince of Darkness", shortName: "Ozzy", id: "48f99577-cfc3-40b4-8161-844300c823d4", channelId: process.env.OZZY_CHANNEL_ID },
+    { name: "Sinners", shortName: "Sinners", id: "24712410-a3a8-4ee0-b2f7-df889424ae76", channelId: process.env.SINNERS_CHANNEL_ID },
+    { name: "Stranger Things", shortName: "Stranger Things", id: "12a4b7d4-3a27-48dd-b355-99fe9f8aab37", channelId: process.env.STRANGER_THINGS_CHANNEL_ID }
   ]
 };
 
